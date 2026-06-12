@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import PreferencePanel from "./PreferencePanel";
+import type { UserPreferences } from "../types/restaurant";
 
 import { fetchNearbyRestaurants } from "../services/restaurantService";
 import type { Restaurant } from "../types/restaurant";
@@ -48,10 +50,15 @@ export default function MapView() {
         setUserLocation(currentLocation);
         setLocationStatus("Konum başarıyla alındı.");
 
-        const nearbyRestaurants = await fetchNearbyRestaurants(
-          currentLocation.lat,
-          currentLocation.lng
-        );
+       const nearbyRestaurants = await fetchNearbyRestaurants(
+           currentLocation.lat,
+           currentLocation.lng,
+       3000
+       );
+       const [preferences, setPreferences] = useState<UserPreferences>({
+  category: "all",
+  cuisine: "",
+});
 
         setRestaurants(nearbyRestaurants);
       },
@@ -60,11 +67,24 @@ export default function MapView() {
       }
     );
   }, []);
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+  const matchesCategory =
+    preferences.category === "all" || restaurant.category === preferences.category;
+
+  const matchesCuisine =
+    preferences.cuisine.trim() === "" ||
+    restaurant.cuisine
+      ?.toLowerCase()
+      .includes(preferences.cuisine.toLowerCase());
+
+  return matchesCategory && matchesCuisine;
+});
 
   return (
     <section>
       <p>{locationStatus}</p>
-      <p>Bulunan mekan sayısı: {restaurants.length}</p>
+        <PreferencePanel preferences={preferences} onChange={setPreferences} />
+      <p>Gösterilen mekan sayısı: {filteredRestaurants.length}</p>
 
       <MapContainer
         center={[userLocation.lat, userLocation.lng]}
@@ -82,7 +102,7 @@ export default function MapView() {
           <Popup>Şu anki konumunuz</Popup>
         </Marker>
 
-        {restaurants.map((restaurant) => (
+        {filteredRestaurants.map((restaurant) => (
           <Marker key={restaurant.id} position={[restaurant.lat, restaurant.lng]}>
             <Popup>
               <strong>{restaurant.name}</strong>
