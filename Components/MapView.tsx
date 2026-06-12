@@ -32,11 +32,12 @@ export default function MapView() {
   const [userLocation, setUserLocation] = useState<Location>(defaultLocation);
   const [locationStatus, setLocationStatus] = useState("Konum alınıyor...");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [preferences, setPreferences] = useState<UserPreferences>({
     category: "all",
     cuisine: "",
+    maxDistance: 3000,
   });
-  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
 
   useEffect(() => {
     const savedFavorites = localStorage.getItem("favoriteRestaurants");
@@ -71,7 +72,7 @@ export default function MapView() {
 
           setRestaurants(nearbyRestaurants);
         } catch (error) {
-          console.error(error);
+          console.warn("Overpass API geçici olarak yanıt vermedi:", error);
           setLocationStatus(
             "Konum alındı ancak mekan verileri şu anda getirilemedi."
           );
@@ -93,6 +94,26 @@ export default function MapView() {
     localStorage.setItem("favoriteRestaurants", JSON.stringify(updatedFavorites));
   };
 
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
+    const R = 6371000;
+
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesCategory =
       preferences.category === "all" ||
@@ -104,7 +125,16 @@ export default function MapView() {
         ?.toLowerCase()
         .includes(preferences.cuisine.toLowerCase());
 
-    return matchesCategory && matchesCuisine;
+    const distance = calculateDistance(
+      userLocation.lat,
+      userLocation.lng,
+      restaurant.lat,
+      restaurant.lng
+    );
+
+    const matchesDistance = distance <= preferences.maxDistance;
+
+    return matchesCategory && matchesCuisine && matchesDistance;
   });
 
   const recommendedRestaurants = filteredRestaurants
@@ -134,6 +164,12 @@ export default function MapView() {
       return {
         ...restaurant,
         score,
+        distance: calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          restaurant.lat,
+          restaurant.lng
+        ),
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -210,6 +246,16 @@ export default function MapView() {
                     }}
                   >
                     {restaurant.cuisine ?? restaurant.category}
+                  </p>
+
+                  <p
+                    style={{
+                      marginTop: "6px",
+                      fontSize: "13px",
+                      color: "#667085",
+                    }}
+                  >
+                    {Math.round(restaurant.distance)} m uzaklıkta
                   </p>
 
                   <span

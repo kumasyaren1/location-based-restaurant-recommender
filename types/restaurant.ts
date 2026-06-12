@@ -13,4 +13,5 @@ export type Restaurant = {
 export type UserPreferences = {
   category: RestaurantCategory;
   cuisine: string;
+  maxDistance: number;
 };

@@ -40,6 +40,26 @@ export default function PreferencePanel({
 
       <div>
         <label style={{ fontWeight: 600 }}>Mutfak türü</label>
+          <div>
+  <label style={{ fontWeight: 600 }}>
+    Maksimum Mesafe ({preferences.maxDistance} m)
+  </label>
+
+  <input
+    type="range"
+    min="500"
+    max="5000"
+    step="500"
+    value={preferences.maxDistance}
+    onChange={(e) =>
+      onChange({
+        ...preferences,
+        maxDistance: Number(e.target.value),
+      })
+    }
+    style={{ width: "100%", marginTop: "10px" }}
+  />
+</div>
         <input
           style={fieldStyle}
           placeholder="pizza, kebap, kahve..."
