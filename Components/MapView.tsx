@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import PreferencePanel from "./PreferencePanel";
-import type { UserPreferences } from "../types/restaurant";
 
+import PreferencePanel from "./PreferencePanel";
 import { fetchNearbyRestaurants } from "../services/restaurantService";
-import type { Restaurant } from "../types/restaurant";
+import type { Restaurant, UserPreferences } from "../types/restaurant";
 
 type Location = {
   lat: number;
@@ -33,6 +32,10 @@ export default function MapView() {
   const [userLocation, setUserLocation] = useState<Location>(defaultLocation);
   const [locationStatus, setLocationStatus] = useState("Konum alınıyor...");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    category: "all",
+    cuisine: "",
+  });
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -50,15 +53,11 @@ export default function MapView() {
         setUserLocation(currentLocation);
         setLocationStatus("Konum başarıyla alındı.");
 
-       const nearbyRestaurants = await fetchNearbyRestaurants(
-           currentLocation.lat,
-           currentLocation.lng,
-       3000
-       );
-       const [preferences, setPreferences] = useState<UserPreferences>({
-  category: "all",
-  cuisine: "",
-});
+        const nearbyRestaurants = await fetchNearbyRestaurants(
+          currentLocation.lat,
+          currentLocation.lng,
+          3000
+        );
 
         setRestaurants(nearbyRestaurants);
       },
@@ -67,23 +66,27 @@ export default function MapView() {
       }
     );
   }, []);
+
   const filteredRestaurants = restaurants.filter((restaurant) => {
-  const matchesCategory =
-    preferences.category === "all" || restaurant.category === preferences.category;
+    const matchesCategory =
+      preferences.category === "all" ||
+      restaurant.category === preferences.category;
 
-  const matchesCuisine =
-    preferences.cuisine.trim() === "" ||
-    restaurant.cuisine
-      ?.toLowerCase()
-      .includes(preferences.cuisine.toLowerCase());
+    const matchesCuisine =
+      preferences.cuisine.trim() === "" ||
+      restaurant.cuisine
+        ?.toLowerCase()
+        .includes(preferences.cuisine.toLowerCase());
 
-  return matchesCategory && matchesCuisine;
-});
+    return matchesCategory && matchesCuisine;
+  });
 
   return (
     <section>
       <p>{locationStatus}</p>
-        <PreferencePanel preferences={preferences} onChange={setPreferences} />
+
+      <PreferencePanel preferences={preferences} onChange={setPreferences} />
+
       <p>Gösterilen mekan sayısı: {filteredRestaurants.length}</p>
 
       <MapContainer
