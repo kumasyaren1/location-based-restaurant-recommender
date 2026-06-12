@@ -1,4 +1,4 @@
-import MapView from "../components/MapView";
+import MapViewWrapper from "../components/MapViewWrapper";
 
 export default function Home() {
   return (
@@ -9,12 +9,7 @@ export default function Home() {
         background: "#f4f6f8",
       }}
     >
-      <section
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-        }}
-      >
+      <section style={{ maxWidth: "1200px", margin: "0 auto" }}>
         <div style={{ marginBottom: "24px" }}>
           <h1 style={{ fontSize: "32px", marginBottom: "8px" }}>
             Akıllı Restoran Öneri Sistemi
@@ -24,7 +19,7 @@ export default function Home() {
           </p>
         </div>
 
-        <MapView />
+        <MapViewWrapper />
       </section>
     </main>
   );

@@ -42,7 +42,7 @@ export default function PreferencePanel({
         <label style={{ fontWeight: 600 }}>Mutfak türü</label>
         <input
           style={fieldStyle}
-          placeholder="pizza, kebab, coffee..."
+          placeholder="pizza, kebap, kahve..."
           value={preferences.cuisine}
           onChange={(e) =>
             onChange({

@@ -62,13 +62,21 @@ export default function MapView() {
         setUserLocation(currentLocation);
         setLocationStatus("Konum başarıyla alındı.");
 
-        const nearbyRestaurants = await fetchNearbyRestaurants(
-          currentLocation.lat,
-          currentLocation.lng,
-          3000
-        );
+        try {
+          const nearbyRestaurants = await fetchNearbyRestaurants(
+            currentLocation.lat,
+            currentLocation.lng,
+            3000
+          );
 
-        setRestaurants(nearbyRestaurants);
+          setRestaurants(nearbyRestaurants);
+        } catch (error) {
+          console.error(error);
+          setLocationStatus(
+            "Konum alındı ancak mekan verileri şu anda getirilemedi."
+          );
+          setRestaurants([]);
+        }
       },
       () => {
         setLocationStatus("Konum izni verilmedi. Varsayılan konum gösteriliyor.");
@@ -98,6 +106,37 @@ export default function MapView() {
 
     return matchesCategory && matchesCuisine;
   });
+
+  const recommendedRestaurants = filteredRestaurants
+    .map((restaurant) => {
+      let score = 0;
+
+      if (
+        preferences.category !== "all" &&
+        restaurant.category === preferences.category
+      ) {
+        score += 50;
+      }
+
+      if (
+        preferences.cuisine.trim() !== "" &&
+        restaurant.cuisine
+          ?.toLowerCase()
+          .includes(preferences.cuisine.toLowerCase())
+      ) {
+        score += 30;
+      }
+
+      if (favoriteIds.includes(restaurant.id)) {
+        score += 20;
+      }
+
+      return {
+        ...restaurant,
+        score,
+      };
+    })
+    .sort((a, b) => b.score - a.score);
 
   return (
     <section
@@ -134,7 +173,9 @@ export default function MapView() {
         </div>
 
         <div style={{ marginTop: "20px" }}>
-          <h3 style={{ marginBottom: "12px" }}>Senin İçin Uygun Mekanlar</h3>
+          <h3 style={{ marginBottom: "12px" }}>
+            Senin İçin En Uygun Mekanlar
+          </h3>
 
           <div
             style={{
@@ -144,12 +185,12 @@ export default function MapView() {
               overflowY: "auto",
             }}
           >
-            {filteredRestaurants.length === 0 ? (
+            {recommendedRestaurants.length === 0 ? (
               <p style={{ color: "#667085" }}>
                 Seçimlerine uygun mekan bulunamadı.
               </p>
             ) : (
-              filteredRestaurants.map((restaurant) => (
+              recommendedRestaurants.map((restaurant) => (
                 <div
                   key={restaurant.id}
                   style={{
@@ -182,6 +223,16 @@ export default function MapView() {
                   >
                     {restaurant.category}
                   </span>
+
+                  <p
+                    style={{
+                      marginTop: "8px",
+                      fontSize: "13px",
+                      color: "#475467",
+                    }}
+                  >
+                    Öneri puanı: {restaurant.score}
+                  </p>
 
                   <button
                     onClick={() => toggleFavorite(restaurant.id)}
