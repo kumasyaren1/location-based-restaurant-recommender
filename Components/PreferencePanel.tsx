@@ -5,15 +5,24 @@ type PreferencePanelProps = {
   onChange: (preferences: UserPreferences) => void;
 };
 
+const fieldStyle = {
+  width: "100%",
+  padding: "10px 12px",
+  borderRadius: "12px",
+  border: "1px solid #d0d5dd",
+  marginTop: "6px",
+};
+
 export default function PreferencePanel({
   preferences,
   onChange,
 }: PreferencePanelProps) {
   return (
-    <div style={{ marginBottom: "16px", display: "flex", gap: "12px" }}>
-      <label>
-        Kategori:
+    <div style={{ display: "grid", gap: "16px" }}>
+      <div>
+        <label style={{ fontWeight: 600 }}>Kategori</label>
         <select
+          style={fieldStyle}
           value={preferences.category}
           onChange={(e) =>
             onChange({
@@ -27,11 +36,12 @@ export default function PreferencePanel({
           <option value="cafe">Kafe</option>
           <option value="fast_food">Fast Food</option>
         </select>
-      </label>
+      </div>
 
-      <label>
-        Mutfak türü:
+      <div>
+        <label style={{ fontWeight: 600 }}>Mutfak türü</label>
         <input
+          style={fieldStyle}
           placeholder="pizza, kebab, coffee..."
           value={preferences.cuisine}
           onChange={(e) =>
@@ -41,7 +51,7 @@ export default function PreferencePanel({
             })
           }
         />
-      </label>
+      </div>
     </div>
   );
 }

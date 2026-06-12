@@ -82,17 +82,49 @@ export default function MapView() {
   });
 
   return (
-    <section>
-      <p>{locationStatus}</p>
+  <section
+    style={{
+      display: "grid",
+      gridTemplateColumns: "360px 1fr",
+      gap: "24px",
+      alignItems: "start",
+    }}
+  >
+    <aside
+      style={{
+        background: "#ffffff",
+        borderRadius: "20px",
+        padding: "20px",
+        boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
+      }}
+    >
+      <p style={{ color: "#667085", marginBottom: "12px" }}>{locationStatus}</p>
 
       <PreferencePanel preferences={preferences} onChange={setPreferences} />
 
-      <p>Gösterilen mekan sayısı: {filteredRestaurants.length}</p>
+      <div
+        style={{
+          marginTop: "16px",
+          padding: "12px",
+          borderRadius: "14px",
+          background: "#f8fafc",
+        }}
+      >
+        <strong>{filteredRestaurants.length}</strong> mekan gösteriliyor
+      </div>
+    </aside>
 
+    <div>
       <MapContainer
         center={[userLocation.lat, userLocation.lng]}
         zoom={14}
-        style={{ height: "500px", width: "100%", borderRadius: "12px" }}
+        style={{
+          height: "620px",
+          width: "100%",
+          borderRadius: "24px",
+          overflow: "hidden",
+          boxShadow: "0 20px 40px rgba(15, 23, 42, 0.12)",
+        }}
       >
         <ChangeMapView location={userLocation} />
 
@@ -115,6 +147,6 @@ export default function MapView() {
           </Marker>
         ))}
       </MapContainer>
-    </section>
-  );
-}
+    </div>
+  </section>
+);}
