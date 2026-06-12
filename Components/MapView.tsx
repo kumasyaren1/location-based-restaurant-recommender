@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
+import { fetchNearbyRestaurants } from "../services/restaurantService";
+import type { Restaurant } from "../types/restaurant";
+
 type Location = {
   lat: number;
   lng: number;
@@ -27,6 +30,7 @@ function ChangeMapView({ location }: { location: Location }) {
 export default function MapView() {
   const [userLocation, setUserLocation] = useState<Location>(defaultLocation);
   const [locationStatus, setLocationStatus] = useState("Konum alınıyor...");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -35,12 +39,21 @@ export default function MapView() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({
+      async (position) => {
+        const currentLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-        });
+        };
+
+        setUserLocation(currentLocation);
         setLocationStatus("Konum başarıyla alındı.");
+
+        const nearbyRestaurants = await fetchNearbyRestaurants(
+          currentLocation.lat,
+          currentLocation.lng
+        );
+
+        setRestaurants(nearbyRestaurants);
       },
       () => {
         setLocationStatus("Konum izni verilmedi. Varsayılan konum gösteriliyor.");
@@ -51,6 +64,7 @@ export default function MapView() {
   return (
     <section>
       <p>{locationStatus}</p>
+      <p>Bulunan mekan sayısı: {restaurants.length}</p>
 
       <MapContainer
         center={[userLocation.lat, userLocation.lng]}
@@ -67,6 +81,16 @@ export default function MapView() {
         <Marker position={[userLocation.lat, userLocation.lng]}>
           <Popup>Şu anki konumunuz</Popup>
         </Marker>
+
+        {restaurants.map((restaurant) => (
+          <Marker key={restaurant.id} position={[restaurant.lat, restaurant.lng]}>
+            <Popup>
+              <strong>{restaurant.name}</strong>
+              <br />
+              {restaurant.cuisine ?? restaurant.category}
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
     </section>
   );
