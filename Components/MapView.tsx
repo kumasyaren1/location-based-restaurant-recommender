@@ -36,6 +36,15 @@ export default function MapView() {
     category: "all",
     cuisine: "",
   });
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem("favoriteRestaurants");
+
+    if (savedFavorites) {
+      setFavoriteIds(JSON.parse(savedFavorites));
+    }
+  }, []);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -67,6 +76,15 @@ export default function MapView() {
     );
   }, []);
 
+  const toggleFavorite = (restaurantId: number) => {
+    const updatedFavorites = favoriteIds.includes(restaurantId)
+      ? favoriteIds.filter((id) => id !== restaurantId)
+      : [...favoriteIds, restaurantId];
+
+    setFavoriteIds(updatedFavorites);
+    localStorage.setItem("favoriteRestaurants", JSON.stringify(updatedFavorites));
+  };
+
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesCategory =
       preferences.category === "all" ||
@@ -82,110 +100,151 @@ export default function MapView() {
   });
 
   return (
-  <section
-    style={{
-      display: "grid",
-      gridTemplateColumns: "360px 1fr",
-      gap: "24px",
-      alignItems: "start",
-    }}
-  >
-    <aside
+    <section
       style={{
-        background: "#ffffff",
-        borderRadius: "20px",
-        padding: "20px",
-        boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
+        display: "grid",
+        gridTemplateColumns: "360px 1fr",
+        gap: "24px",
+        alignItems: "start",
       }}
     >
-      <p style={{ color: "#667085", marginBottom: "12px" }}>{locationStatus}</p>
-
-      <PreferencePanel preferences={preferences} onChange={setPreferences} />
-
-      <div
+      <aside
         style={{
-          marginTop: "16px",
-          padding: "12px",
-          borderRadius: "14px",
-          background: "#f8fafc",
+          background: "#ffffff",
+          borderRadius: "20px",
+          padding: "20px",
+          boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
         }}
       >
-        <strong>{filteredRestaurants.length}</strong> mekan gösteriliyor
-      </div>
-        <div style={{ marginTop: "20px" }}>
-  <h3 style={{ marginBottom: "12px" }}>Senin İçin Uygun Mekanlar</h3>
+        <p style={{ color: "#667085", marginBottom: "12px" }}>
+          {locationStatus}
+        </p>
 
-  <div style={{ display: "grid", gap: "12px", maxHeight: "360px", overflowY: "auto" }}>
-    {filteredRestaurants.length === 0 ? (
-      <p style={{ color: "#667085" }}>Seçimlerine uygun mekan bulunamadı.</p>
-    ) : (
-      filteredRestaurants.map((restaurant) => (
+        <PreferencePanel preferences={preferences} onChange={setPreferences} />
+
         <div
-          key={restaurant.id}
           style={{
+            marginTop: "16px",
             padding: "12px",
             borderRadius: "14px",
-            border: "1px solid #e4e7ec",
-            background: "#ffffff",
+            background: "#f8fafc",
           }}
         >
-          <strong>{restaurant.name}</strong>
+          <strong>{filteredRestaurants.length}</strong> mekan gösteriliyor
+        </div>
 
-          <p style={{ margin: "6px 0", color: "#667085", fontSize: "14px" }}>
-            {restaurant.cuisine ?? restaurant.category}
-          </p>
+        <div style={{ marginTop: "20px" }}>
+          <h3 style={{ marginBottom: "12px" }}>Senin İçin Uygun Mekanlar</h3>
 
-          <span
+          <div
             style={{
-              display: "inline-block",
-              padding: "4px 8px",
-              borderRadius: "999px",
-              background: "#eef2ff",
-              fontSize: "12px",
+              display: "grid",
+              gap: "12px",
+              maxHeight: "360px",
+              overflowY: "auto",
             }}
           >
-            {restaurant.category}
-          </span>
+            {filteredRestaurants.length === 0 ? (
+              <p style={{ color: "#667085" }}>
+                Seçimlerine uygun mekan bulunamadı.
+              </p>
+            ) : (
+              filteredRestaurants.map((restaurant) => (
+                <div
+                  key={restaurant.id}
+                  style={{
+                    padding: "12px",
+                    borderRadius: "14px",
+                    border: "1px solid #e4e7ec",
+                    background: "#ffffff",
+                  }}
+                >
+                  <strong>{restaurant.name}</strong>
+
+                  <p
+                    style={{
+                      margin: "6px 0",
+                      color: "#667085",
+                      fontSize: "14px",
+                    }}
+                  >
+                    {restaurant.cuisine ?? restaurant.category}
+                  </p>
+
+                  <span
+                    style={{
+                      display: "inline-block",
+                      padding: "4px 8px",
+                      borderRadius: "999px",
+                      background: "#eef2ff",
+                      fontSize: "12px",
+                    }}
+                  >
+                    {restaurant.category}
+                  </span>
+
+                  <button
+                    onClick={() => toggleFavorite(restaurant.id)}
+                    style={{
+                      marginTop: "10px",
+                      width: "100%",
+                      padding: "8px",
+                      borderRadius: "10px",
+                      border: "1px solid #e4e7ec",
+                      background: favoriteIds.includes(restaurant.id)
+                        ? "#fff7ed"
+                        : "#f9fafb",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {favoriteIds.includes(restaurant.id)
+                      ? "★ Favorilerde"
+                      : "☆ Favoriye ekle"}
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      ))
-    )}
-  </div>
-</div>
-    </aside>
+      </aside>
 
-    <div>
-      <MapContainer
-        center={[userLocation.lat, userLocation.lng]}
-        zoom={14}
-        style={{
-          height: "620px",
-          width: "100%",
-          borderRadius: "24px",
-          overflow: "hidden",
-          boxShadow: "0 20px 40px rgba(15, 23, 42, 0.12)",
-        }}
-      >
-        <ChangeMapView location={userLocation} />
+      <div>
+        <MapContainer
+          center={[userLocation.lat, userLocation.lng]}
+          zoom={14}
+          style={{
+            height: "620px",
+            width: "100%",
+            borderRadius: "24px",
+            overflow: "hidden",
+            boxShadow: "0 20px 40px rgba(15, 23, 42, 0.12)",
+          }}
+        >
+          <ChangeMapView location={userLocation} />
 
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+          <TileLayer
+            attribution='&copy; OpenStreetMap contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
-        <Marker position={[userLocation.lat, userLocation.lng]}>
-          <Popup>Şu anki konumunuz</Popup>
-        </Marker>
-
-        {filteredRestaurants.map((restaurant) => (
-          <Marker key={restaurant.id} position={[restaurant.lat, restaurant.lng]}>
-            <Popup>
-              <strong>{restaurant.name}</strong>
-              <br />
-              {restaurant.cuisine ?? restaurant.category}
-            </Popup>
+          <Marker position={[userLocation.lat, userLocation.lng]}>
+            <Popup>Şu anki konumunuz</Popup>
           </Marker>
-        ))}
-      </MapContainer>
-    </div>
-  </section>
-);}
+
+          {filteredRestaurants.map((restaurant) => (
+            <Marker
+              key={restaurant.id}
+              position={[restaurant.lat, restaurant.lng]}
+            >
+              <Popup>
+                <strong>{restaurant.name}</strong>
+                <br />
+                {restaurant.cuisine ?? restaurant.category}
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </div>
+    </section>
+  );
+}
