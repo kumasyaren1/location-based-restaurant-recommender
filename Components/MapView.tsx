@@ -112,6 +112,45 @@ export default function MapView() {
       >
         <strong>{filteredRestaurants.length}</strong> mekan gösteriliyor
       </div>
+        <div style={{ marginTop: "20px" }}>
+  <h3 style={{ marginBottom: "12px" }}>Senin İçin Uygun Mekanlar</h3>
+
+  <div style={{ display: "grid", gap: "12px", maxHeight: "360px", overflowY: "auto" }}>
+    {filteredRestaurants.length === 0 ? (
+      <p style={{ color: "#667085" }}>Seçimlerine uygun mekan bulunamadı.</p>
+    ) : (
+      filteredRestaurants.map((restaurant) => (
+        <div
+          key={restaurant.id}
+          style={{
+            padding: "12px",
+            borderRadius: "14px",
+            border: "1px solid #e4e7ec",
+            background: "#ffffff",
+          }}
+        >
+          <strong>{restaurant.name}</strong>
+
+          <p style={{ margin: "6px 0", color: "#667085", fontSize: "14px" }}>
+            {restaurant.cuisine ?? restaurant.category}
+          </p>
+
+          <span
+            style={{
+              display: "inline-block",
+              padding: "4px 8px",
+              borderRadius: "999px",
+              background: "#eef2ff",
+              fontSize: "12px",
+            }}
+          >
+            {restaurant.category}
+          </span>
+        </div>
+      ))
+    )}
+  </div>
+</div>
     </aside>
 
     <div>
