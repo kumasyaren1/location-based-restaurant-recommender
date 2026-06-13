@@ -310,6 +310,15 @@ export default function MapView() {
                   >
                     {Math.round(restaurant.distance)} m uzaklıkta
                   </p>
+                    <p
+  style={{
+    marginTop: "6px",
+    fontSize: "13px",
+    color: "#667085",
+  }}
+>
+  📍 {restaurant.address}
+</p>
 
                   <span
                     style={{
@@ -405,6 +414,8 @@ export default function MapView() {
 </h4>
                 <br />
                 {formatCuisine(restaurant.cuisine)}
+                  <br />
+📍 {restaurant.address}
               </Popup>
             </Marker>
           ))}

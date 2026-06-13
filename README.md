@@ -111,7 +111,7 @@ npm run dev
 ---
 ## Uygulama Görünümü
 
-![Akıllı Restoran Öneri Sistemi](./uyg.png)
+![Akıllı Restoran Öneri Sistemi](./uyg1.png)
 
 ## 🌐 Live Demo
 

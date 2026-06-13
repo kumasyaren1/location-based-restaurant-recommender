@@ -9,7 +9,27 @@ type OverpassElement = {
     amenity?: "restaurant" | "cafe" | "fast_food";
     cuisine?: string;
     "addr:street"?: string;
+    "addr:housenumber"?: string;
+    "addr:neighbourhood"?: string;
+    "addr:district"?: string;
+    "addr:city"?: string;
   };
+};
+
+const formatAddress = (tags?: OverpassElement["tags"]) => {
+  if (!tags) return "Adres bilgisi yok";
+
+  const addressParts = [
+    tags["addr:neighbourhood"],
+    tags["addr:street"],
+    tags["addr:housenumber"],
+    tags["addr:district"],
+    tags["addr:city"],
+  ].filter(Boolean);
+
+  return addressParts.length > 0
+    ? addressParts.join(", ")
+    : "Adres bilgisi yok";
 };
 
 export async function fetchNearbyRestaurants(
@@ -44,7 +64,7 @@ export async function fetchNearbyRestaurants(
       lat: item.lat as number,
       lng: item.lon as number,
       cuisine: item.tags?.cuisine,
-      address: item.tags?.["addr:street"],
+      address: formatAddress(item.tags),
       category: item.tags?.amenity ?? "restaurant",
     }));
 }
