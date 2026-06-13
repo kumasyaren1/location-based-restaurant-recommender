@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Akıllı Restoran Öneri Sistemi
 
-## Getting Started
+Kullanıcının konumunu kullanarak çevresindeki restoran, kafe ve fast-food mekanlarını keşfetmesini sağlayan konum tabanlı öneri sistemi.
 
-First, run the development server:
+## Proje Özeti
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Bu proje, kullanıcının mevcut konumunu alarak çevredeki mekanları OpenStreetMap ve Overpass API üzerinden gerçek zamanlı olarak listelemektedir.
+
+Kullanıcı;
+
+- Mekan kategorisi seçebilir
+- Mutfak türüne göre filtreleme yapabilir
+- Maksimum mesafe belirleyebilir
+- Mekanları favorilerine ekleyebilir
+- Kendi tercihlerine göre sıralanmış öneriler alabilir
+
+Tercihler ve favoriler LocalStorage üzerinde saklanmaktadır.
+
+---
+
+## Özellikler
+
+### Konum Tespiti
+
+- HTML5 Geolocation API kullanılarak kullanıcının mevcut konumu alınır.
+- Kullanıcının konumu harita üzerinde gösterilir.
+
+### Harita Entegrasyonu
+
+- React Leaflet kullanılmıştır.
+- OpenStreetMap haritaları görüntülenmektedir.
+
+### Mekan Keşfi
+
+- Yakındaki restoranlar
+- Kafeler
+- Fast-food mekanları
+
+gerçek zamanlı olarak listelenmektedir.
+
+### Filtreleme
+
+Kullanıcı aşağıdaki kriterlere göre filtreleme yapabilir:
+
+- Kategori
+- Mutfak türü
+- Maksimum mesafe
+
+### Favoriler
+
+Beğenilen mekanlar favorilere eklenebilir.
+
+Favori mekanlar LocalStorage üzerinde saklanmaktadır.
+
+### Öneri Algoritması
+
+Öneri puanı şu kriterlere göre hesaplanmaktadır:
+
+- Kategori eşleşmesi
+- Mutfak tercihi eşleşmesi
+- Favori mekan davranışı
+
+Bu puanlara göre mekanlar sıralanmaktadır.
+
+---
+
+## Kullanılan Teknolojiler
+
+- Next.js
+- React
+- TypeScript
+- React Leaflet
+- OpenStreetMap
+- Overpass API
+- LocalStorage
+
+---
+
+## Proje Yapısı
+
+```text
+app/
+components/
+services/
+types/
+public/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Kurulum
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+git clone <repo-link>
+cd location-based-restaurant-recommender
 
-## Learn More
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Uygulama Görünümü
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Kullanıcı konumu
+- Harita görünümü
+- Filtreleme paneli
+- Favoriler sistemi
+- Kişiselleştirilmiş öneriler
 
-## Deploy on Vercel
+---
+## Uygulama Görünümü
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+![Akıllı Restoran Öneri Sistemi](./uyg.png)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 👩‍💻 Geliştirici
+
+Yaren Kumaş
+
+Erciyes Üniversitesi
+Bilgisayar Mühendisliği
