@@ -57,7 +57,11 @@ export default function PreferencePanel({
         maxDistance: Number(e.target.value),
       })
     }
-    style={{ width: "100%", marginTop: "10px" }}
+    style={{
+  width: "100%",
+  marginTop: "10px",
+  accentColor: "#f97316",
+}}
   />
 </div>
         <input

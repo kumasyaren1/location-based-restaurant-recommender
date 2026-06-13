@@ -3,10 +3,20 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-
+import L from "leaflet";
 import PreferencePanel from "./PreferencePanel";
 import { fetchNearbyRestaurants } from "../services/restaurantService";
 import type { Restaurant, UserPreferences } from "../types/restaurant";
+
+delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })
+  ._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
 type Location = {
   lat: number;
@@ -36,8 +46,18 @@ export default function MapView() {
   const [preferences, setPreferences] = useState<UserPreferences>({
     category: "all",
     cuisine: "",
-    maxDistance: 3000,
+    maxDistance: 5000,
   });
+  useEffect(() => {
+  const savedPreferences = localStorage.getItem("userPreferences");
+
+  if (savedPreferences) {
+    setPreferences(JSON.parse(savedPreferences));
+  }
+}, []);
+  useEffect(() => {
+  localStorage.setItem("userPreferences", JSON.stringify(preferences));
+}, [preferences]);
 
   useEffect(() => {
     const savedFavorites = localStorage.getItem("favoriteRestaurants");
@@ -61,7 +81,7 @@ export default function MapView() {
         };
 
         setUserLocation(currentLocation);
-        setLocationStatus("Konum başarıyla alındı.");
+        setLocationStatus("Yakındaki mekanlar aranıyor...");
 
         try {
           const nearbyRestaurants = await fetchNearbyRestaurants(
@@ -71,6 +91,7 @@ export default function MapView() {
           );
 
           setRestaurants(nearbyRestaurants);
+          setLocationStatus("Mekanlar başarıyla getirildi.");
         } catch (error) {
           console.warn("Overpass API geçici olarak yanıt vermedi:", error);
           setLocationStatus(
@@ -113,6 +134,19 @@ export default function MapView() {
 
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
+  const formatCuisine = (cuisine?: string) => {
+  if (!cuisine) return "Mutfak bilgisi yok";
+
+  return cuisine
+    .split(";")
+    .slice(0, 3)
+    .map((item) =>
+      item
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase())
+    )
+    .join(" • ");
+};
 
   const filteredRestaurants = restaurants.filter((restaurant) => {
     const matchesCategory =
@@ -178,18 +212,19 @@ export default function MapView() {
     <section
       style={{
         display: "grid",
-        gridTemplateColumns: "360px 1fr",
+        gridTemplateColumns: "420px 1fr",
         gap: "24px",
         alignItems: "start",
       }}
     >
       <aside
         style={{
-          background: "#ffffff",
-          borderRadius: "20px",
-          padding: "20px",
-          boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
-        }}
+  background: "rgba(255, 255, 255, 0.92)",
+  borderRadius: "28px",
+  padding: "24px",
+  boxShadow: "0 18px 45px rgba(234, 88, 12, 0.12)",
+  border: "1px solid #fed7aa",
+}}
       >
         <p style={{ color: "#667085", marginBottom: "12px" }}>
           {locationStatus}
@@ -198,28 +233,36 @@ export default function MapView() {
         <PreferencePanel preferences={preferences} onChange={setPreferences} />
 
         <div
-          style={{
-            marginTop: "16px",
-            padding: "12px",
-            borderRadius: "14px",
-            background: "#f8fafc",
-          }}
-        >
-          <strong>{filteredRestaurants.length}</strong> mekan gösteriliyor
-        </div>
-
+  style={{
+    marginTop: "16px",
+    padding: "14px",
+    borderRadius: "18px",
+    background: "linear-gradient(135deg, #fb923c, #f97316)",
+    color: "white",
+    fontWeight: 600,
+    boxShadow: "0 10px 20px rgba(249,115,22,0.25)",
+  }}
+>
+  🍽️ {filteredRestaurants.length} mekan gösteriliyor
+</div>
         <div style={{ marginTop: "20px" }}>
-          <h3 style={{ marginBottom: "12px" }}>
-            Senin İçin En Uygun Mekanlar
-          </h3>
+         <h3
+  style={{
+    color: "#ea580c",
+    fontSize: "22px",
+    marginBottom: "12px",
+  }}
+>
+  🔥 Senin İçin En Uygun Mekanlar 🔥
+</h3>
 
           <div
-            style={{
-              display: "grid",
-              gap: "12px",
-              maxHeight: "360px",
-              overflowY: "auto",
-            }}
+           style={{
+   display: "grid",
+  gap: "12px",
+  maxHeight: "360px",
+  overflowY: "auto",
+}}
           >
             {recommendedRestaurants.length === 0 ? (
               <p style={{ color: "#667085" }}>
@@ -236,17 +279,27 @@ export default function MapView() {
                     background: "#ffffff",
                   }}
                 >
-                  <strong>{restaurant.name}</strong>
+                  <h4
+  style={{
+    margin: "0 0 8px 0",
+    fontSize: "18px",
+    color: "#111827",
+    fontWeight: 800,
+  }}
+>
+  {restaurant.name || "İsimsiz Mekan"}
+</h4>
 
-                  <p
-                    style={{
-                      margin: "6px 0",
-                      color: "#667085",
-                      fontSize: "14px",
-                    }}
-                  >
-                    {restaurant.cuisine ?? restaurant.category}
-                  </p>
+<div
+  style={{
+    margin: "4px 0",
+    color: "#6b7280",
+    fontSize: "14px",
+    lineHeight: "1.4",
+  }}
+>
+  {formatCuisine(restaurant.cuisine)}
+</div>
 
                   <p
                     style={{
@@ -267,7 +320,11 @@ export default function MapView() {
                       fontSize: "12px",
                     }}
                   >
-                    {restaurant.category}
+                    {restaurant.category === "fast_food"
+  ? "Fast Food"
+  : restaurant.category === "cafe"
+  ? "Kafe"
+  : "Restoran"}
                   </span>
 
                   <p
@@ -282,17 +339,19 @@ export default function MapView() {
 
                   <button
                     onClick={() => toggleFavorite(restaurant.id)}
-                    style={{
-                      marginTop: "10px",
-                      width: "100%",
-                      padding: "8px",
-                      borderRadius: "10px",
-                      border: "1px solid #e4e7ec",
-                      background: favoriteIds.includes(restaurant.id)
-                        ? "#fff7ed"
-                        : "#f9fafb",
-                      cursor: "pointer",
-                    }}
+                   style={{
+  marginTop: "10px",
+  width: "100%",
+  padding: "10px",
+  borderRadius: "14px",
+  border: "none",
+  background: favoriteIds.includes(restaurant.id)
+    ? "linear-gradient(135deg, #f97316, #ea580c)"
+    : "#fff7ed",
+  color: favoriteIds.includes(restaurant.id) ? "white" : "#ea580c",
+  fontWeight: 700,
+  cursor: "pointer",
+}}
                   >
                     {favoriteIds.includes(restaurant.id)
                       ? "★ Favorilerde"
@@ -334,9 +393,18 @@ export default function MapView() {
               position={[restaurant.lat, restaurant.lng]}
             >
               <Popup>
-                <strong>{restaurant.name}</strong>
+                <h4
+  style={{
+    margin: "0 0 8px 0",
+    fontSize: "18px",
+    color: "#111827",
+    fontWeight: 800,
+  }}
+>
+  {restaurant.name || "İsimsiz Mekan"}
+</h4>
                 <br />
-                {restaurant.cuisine ?? restaurant.category}
+                {formatCuisine(restaurant.cuisine)}
               </Popup>
             </Marker>
           ))}
