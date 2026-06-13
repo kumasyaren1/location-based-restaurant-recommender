@@ -113,6 +113,10 @@ npm run dev
 
 ![Akıllı Restoran Öneri Sistemi](./uyg.png)
 
+## 🌐 Live Demo
+
+https://smart-restaurant-recommender.vercel.app/
+
 ## 👩‍💻 Geliştirici
 
 Yaren Kumaş
