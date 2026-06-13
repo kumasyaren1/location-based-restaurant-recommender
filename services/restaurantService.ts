@@ -45,16 +45,35 @@ export async function fetchNearbyRestaurants(
     out body;
   `;
 
-  const response = await fetch("https://overpass.kumi.systems/api/interpreter", {
-    method: "POST",
-    body: query,
-  });
+  const endpoints = [
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.openstreetmap.ru/api/interpreter",
+];
 
-  if (!response.ok) {
-    throw new Error("Restoran verileri alınamadı.");
+let data = null;
+
+for (const endpoint of endpoints) {
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      body: query,
+    });
+
+    if (!response.ok) {
+      continue;
+    }
+
+    data = await response.json();
+    break;
+  } catch (error) {
+    console.warn(`${endpoint} yanıt vermedi:`, error);
   }
+}
 
-  const data = await response.json();
+if (!data) {
+  throw new Error("Restoran verileri alınamadı.");
+}
 
   return data.elements
     .filter((item: OverpassElement) => item.lat && item.lon && item.tags?.name)
